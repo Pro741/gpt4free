@@ -28,15 +28,10 @@ temperatures = {
 
 
 class Completion:
-    def create(
-            prompt: str = 'hello world',
-            temperature: int = None,
-            conversation_id: str = '',
-            response_id: str = '',
-            choice_id: str = '') -> BardResponse:
+    def create(self, temperature: int = None, conversation_id: str = '', response_id: str = '', choice_id: str = '') -> BardResponse:
 
         if temperature:
-            prompt = f'''settings: follow these settings for your response: [temperature: {temperature} - {temperatures[temperature]}] | prompt  : {prompt}'''
+            self = f'''settings: follow these settings for your response: [temperature: {temperature} - {temperatures[temperature]}] | prompt  : {self}'''
 
         client = Session()
         client.proxies = {
@@ -66,19 +61,25 @@ class Completion:
             f'https://bard.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?{params}',
             data={
                 'at': snlm0e,
-                'f.req': dumps([None, dumps([
-                    [prompt],
-                    None,
-                    [conversation_id, response_id, choice_id],
-                ])])
-            }
-            )
+                'f.req': dumps(
+                    [
+                        None,
+                        dumps(
+                            [
+                                [self],
+                                None,
+                                [conversation_id, response_id, choice_id],
+                            ]
+                        ),
+                    ]
+                ),
+            },
+        )
 
         chat_data = loads(response.content.splitlines()[3])[0][2]
         if not chat_data:
             print('error, retrying')
-            Completion.create(prompt, temperature,
-                              conversation_id, response_id, choice_id)
+            Completion.create(self, temperature, conversation_id, response_id, choice_id)
 
         json_chat_data = loads(chat_data)
         results = {

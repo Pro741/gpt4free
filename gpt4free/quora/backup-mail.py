@@ -9,8 +9,10 @@ class Mail:
     def __init__(self) -> None:
         self.client = Session()
         self.client.post("https://etempmail.com/")
-        self.cookies = {'acceptcookie': 'true'}
-        self.cookies["ci_session"] = self.client.cookies.get_dict()["ci_session"]
+        self.cookies = {
+            'acceptcookie': 'true',
+            "ci_session": self.client.cookies.get_dict()["ci_session"],
+        }
         self.email = None
 
     def get_mail(self):

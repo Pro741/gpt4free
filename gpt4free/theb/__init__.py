@@ -28,12 +28,16 @@ class Completion:
             'user-agent': UserAgent().random,
         }
 
-        proxies = {'http': 'http://' + proxy, 'https': 'http://' + proxy} if proxy else None
-        
+        proxies = (
+            {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
+            if proxy
+            else None
+        )
+
         options = {}
         if Completion.last_msg_id:
             options['parentMessageId'] = Completion.last_msg_id
-        
+
         requests.post(
             'https://chatbot.theb.ai/api/chat-process',
             headers=headers,
