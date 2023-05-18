@@ -16,7 +16,7 @@ response = gpt4free.Completion.create(
     Provider.ForeFront, prompt='Write a poem on Lionel Messi', model='gpt-4', token=token
 )
 print(response)
-print(f'END')
+print('END')
 
 # usage theb
 response = gpt4free.Completion.create(Provider.Theb, prompt='Write a poem on Lionel Messi')

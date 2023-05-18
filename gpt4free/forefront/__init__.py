@@ -24,21 +24,28 @@ class Account:
 
         with open(Account.COOKIES_FILE_NAME, 'rb') as f:
             cookies = pickle.load(f)
-        proxies = {'http': 'http://' + proxy, 'https': 'http://' + proxy} if proxy else False
+        proxies = (
+            {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
+            if proxy
+            else False
+        )
 
         client = Session(client_identifier='chrome110')
         client.proxies = proxies
         client.cookies.update(cookies)
 
-        if Account.is_cookie_enabled(client):
-            response = client.get('https://clerk.forefront.ai/v1/client?_clerk_js_version=4.38.4')
-            return response.json()['response']['sessions'][0]['last_active_token']['jwt']
-        else:
+        if not Account.is_cookie_enabled(client):
             return Account.create(proxy, logging)
+        response = client.get('https://clerk.forefront.ai/v1/client?_clerk_js_version=4.38.4')
+        return response.json()['response']['sessions'][0]['last_active_token']['jwt']
 
     @staticmethod
     def create(proxy: Optional[str] = None, logging: bool = False, save_cookies: bool = False) -> str:
-        proxies = {'http': 'http://' + proxy, 'https': 'http://' + proxy} if proxy else False
+        proxies = (
+            {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
+            if proxy
+            else False
+        )
 
         start = time()
 
@@ -129,13 +136,17 @@ class StreamingCompletion:
         if not chat_id:
             chat_id = str(uuid4())
 
-        proxies = {'http': 'http://' + proxy, 'https': 'http://' + proxy} if proxy else None
+        proxies = (
+            {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
+            if proxy
+            else None
+        )
 
         headers = {
             'authority': 'chat-server.tenant-forefront-default.knative.chi.coreweave.com',
             'accept': '*/*',
             'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
-            'authorization': 'Bearer ' + token,
+            'authorization': f'Bearer {token}',
             'cache-control': 'no-cache',
             'content-type': 'application/json',
             'origin': 'https://chat.forefront.ai',

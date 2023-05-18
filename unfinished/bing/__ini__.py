@@ -25,16 +25,13 @@ def get_token():
 
 
 class AsyncCompletion:
-    async def create(
-            prompt: str = 'hello world',
-            optionSets: list = [
+    async def create(self, optionSets: list = [
                 'deepleo',
                 'enable_debug_commands',
                 'disable_emoji_spoken_text',
                 'enablemm',
                 'h3relaxedimg'
-            ],
-            token: str = get_token()):
+            ], token: str = get_token()):
         """Create a connection to Bing AI and send the prompt."""
 
         # Send create request

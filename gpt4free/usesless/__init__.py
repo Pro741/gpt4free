@@ -44,13 +44,11 @@ class Completion:
         request = requests.post(url, headers=Completion.headers, json=json_data)
         content = request.content
 
-        response = Completion.__response_to_json(content)
-        return response
+        return Completion.__response_to_json(content)
 
     @classmethod
     def __response_to_json(cls, text) -> dict:
         text = str(text.decode("utf-8"))
 
         split_text = text.rsplit("\n", 1)[1]
-        to_json = json.loads(split_text)
-        return to_json
+        return json.loads(split_text)

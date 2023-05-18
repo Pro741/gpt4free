@@ -48,8 +48,7 @@ def load_queries():
     for path in queries_path.iterdir():
         if path.suffix != ".graphql":
             continue
-        with open(path) as f:
-            queries[path.stem] = f.read()
+        queries[path.stem] = Path(path).read_text()
 
 
 def generate_payload(query_name, variables):
@@ -117,9 +116,9 @@ class Client:
 
     def extract_formkey(self, html):
         script_regex = r"<script>if\(.+\)throw new Error;(.+)</script>"
-        script_text = re.search(script_regex, html).group(1)
+        script_text = re.search(script_regex, html)[1]
         key_regex = r'var .="([0-9a-f]+)",'
-        key_text = re.search(key_regex, script_text).group(1)
+        key_text = re.search(key_regex, script_text)[1]
         cipher_regex = r".\[(\d+)\]=.\[(\d+)\]"
         cipher_pairs = re.findall(cipher_regex, script_text)
 
@@ -127,16 +126,14 @@ class Client:
         for pair in cipher_pairs:
             formkey_index, key_index = map(int, pair)
             formkey_list[formkey_index] = key_text[key_index]
-        formkey = "".join(formkey_list)
-
-        return formkey
+        return "".join(formkey_list)
 
     def get_next_data(self, overwrite_vars=False):
         logger.info("Downloading next_data...")
 
         r = request_with_retries(self.session.get, self.home_url)
         json_regex = r'<script id="__NEXT_DATA__" type="application\/json">(.+?)</script>'
-        json_text = re.search(json_regex, r.text).group(1)
+        json_text = re.search(json_regex, r.text)[1]
         next_data = json.loads(json_text)
 
         if overwrite_vars:
@@ -151,8 +148,7 @@ class Client:
 
         r = request_with_retries(self.session.get, url)
 
-        chat_data = r.json()["pageProps"]["payload"]["chatOfBotDisplayName"]
-        return chat_data
+        return r.json()["pageProps"]["payload"]["chatOfBotDisplayName"]
 
     def get_bots(self, download_next_data=True):
         logger.info("Downloading all bots...")
@@ -161,7 +157,7 @@ class Client:
         else:
             next_data = self.next_data
 
-        if not "availableBots" in self.viewer:
+        if "availableBots" not in self.viewer:
             raise RuntimeError("Invalid token or no bots are available.")
         bot_list = self.viewer["availableBots"]
 
@@ -207,7 +203,7 @@ class Client:
         if channel is None:
             channel = self.channel
         query = f'?min_seq={channel["minSeq"]}&channel={channel["channel"]}&hash={channel["channelHash"]}'
-        return f'wss://{self.ws_domain}.tch.{channel["baseHost"]}/up/{channel["boxName"]}/updates' + query
+        return f'wss://{self.ws_domain}.tch.{channel["baseHost"]}/up/{channel["boxName"]}/updates{query}'
 
     def send_query(self, query_name, variables):
         for i in range(20):
@@ -299,7 +295,7 @@ class Client:
         try:
             data = json.loads(msg)
 
-            if not "messages" in data:
+            if "messages" not in data:
                 return
 
             for message_str in data["messages"]:
@@ -432,15 +428,14 @@ class Client:
 
     def delete_message(self, message_ids):
         logger.info(f"Deleting messages: {message_ids}")
-        if not type(message_ids) is list:
+        if type(message_ids) is not list:
             message_ids = [int(message_ids)]
 
         result = self.send_query("DeleteMessageMutation", {"messageIds": message_ids})
 
     def purge_conversation(self, chatbot, count=-1):
         logger.info(f"Purging messages from {chatbot}")
-        last_messages = self.get_message_history(chatbot, count=50)[::-1]
-        while last_messages:
+        while last_messages := self.get_message_history(chatbot, count=50)[::-1]:
             message_ids = []
             for message in last_messages:
                 if count == 0:
@@ -452,8 +447,7 @@ class Client:
 
             if count == 0:
                 return
-            last_messages = self.get_message_history(chatbot, count=50)[::-1]
-        logger.info(f"No more messages left to delete.")
+        logger.info("No more messages left to delete.")
 
     def create_bot(
         self,
@@ -545,7 +539,9 @@ class Client:
         response = self.send_query('SettingsDeleteAccountButton_deleteAccountMutation_Mutation', {})
         data = response['data']['deleteAccount']
         if 'viewer' not in data:
-            raise RuntimeError(f'Error occurred while deleting the account, Please try again!')
+            raise RuntimeError(
+                'Error occurred while deleting the account, Please try again!'
+            )
 
 
 load_queries()

@@ -9,7 +9,7 @@ from re import findall
 
 class Completion:
 
-    def request(prompt: str):
+    def request(self):
         '''TODO: some sort of authentication + upload PDF from URL or local file
                 Then you should get the atoken and chat ID
                 '''
@@ -19,27 +19,26 @@ class Completion:
 
         url = "https://chat-pr4yueoqha-ue.a.run.app/"
 
-        payload = json.dumps({
-            "v": 2,
-            "chatSession": {
-                "type": "join",
-                "chatId": chat_id
-            },
-            "history": [
-                {
-                    "id": "VNsSyJIq_0",
-						"author": "p_if2GPSfyN8hjDoA7unYe",
-						"msg": "<start>",
-						"time": 1682672009270
-                },
-                {
-					"id": "Zk8DRUtx_6",
-						"author": "uplaceholder",
-						"msg": prompt,
-						"time": 1682672181339
-                }
-            ]
-        })
+        payload = json.dumps(
+            {
+                "v": 2,
+                "chatSession": {"type": "join", "chatId": chat_id},
+                "history": [
+                    {
+                        "id": "VNsSyJIq_0",
+                        "author": "p_if2GPSfyN8hjDoA7unYe",
+                        "msg": "<start>",
+                        "time": 1682672009270,
+                    },
+                    {
+                        "id": "Zk8DRUtx_6",
+                        "author": "uplaceholder",
+                        "msg": self,
+                        "time": 1682672181339,
+                    },
+                ],
+            }
+        )
 
         # TODO: fix headers, use random user-agent, streaming response, etc
         headers = {
